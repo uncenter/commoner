@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "commoner"
+version = "0.1.0"
+description = "Commoner provides a set of common functions and classes for Python projects."
+authors = ["uncenter <me@uncenter.org>"]
+readme = "README.md"
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
