@@ -8,7 +8,7 @@ Modules:
 
 Classes:
     Chalk: A utility class for printing colored test using ANSI escape codes.
-    Console: A utility clas for controlling the console.
+    Console: A utility class for controlling the console.
     Wait: A utility class for waiting-related functions.
     Shout: A utility class for message-related functions.
 
@@ -20,12 +20,14 @@ Functions:
     random_string(length=16, chars=string.printable): Generates a random string of a specified length.
     reverse(iterable): Reverses a list, string, or dictionary.
 """
-__version__ = "0.2.0"
-import os
+__version__ = "0.3.0"
 import time
 import string
 import random
-import itertools
+import json
+import csv
+
+from classes import Chalk, Console, Wait, Shout
 
 string.end_punctuation = ".!?"
 
@@ -34,7 +36,7 @@ def println(text, newlines=1):
     """
     Prints a line of text and then prints a specified number of newlines.
 
-    Parameters:
+    Args:
         text (str): The text to print.
         newlines (int): The number of newlines to print after the text.
 
@@ -48,7 +50,7 @@ def printsln(text):
     """
     Prints a line of text without a newline at the end.
 
-    Parameters:
+    Args:
         text (str): The text to print.
 
     Returns:
@@ -61,7 +63,7 @@ def printx(text, quantity=1):
     """
     Prints a line of text a specified number of times.
 
-    Parameters:
+    Args:
         text (str): The text to print.
         quantity (int): The number of times to print the text.
 
@@ -76,7 +78,7 @@ def typewriter(text, speed=0.2):
     """
     Prints a line of text with a typewriter effect (one character at a time).
 
-    Parameters:
+    Args:
         text (str): The text to print.
         speed (float): The time to wait between printing each character (in seconds).
 
@@ -93,22 +95,182 @@ def random_string(length=16, chars=string.printable):
     """
     Generates a random string of a specified length.
 
-    Parameters:
+    Args:
         length (int): The length of the string to generate.
         chars (str): The characters to use when generating the string.
 
     Returns:
         str: The generated string.
     """
-    print(random.choices(string.printable, k=16))
+    if type(chars) == list or type(chars) == set or type(chars) == tuple:
+        chars = "".join(str(char) for char in chars)
+    elif type(chars) == dict:
+        Shout.error("Cannot generate a random string from a dictionary.")
+        return None
+    elif type(chars) == int or type(chars) == str:
+        chars = str(chars)
+    else:
+        Shout.error("Invalid type for chars.")
+        return None
     return "".join(random.choice(chars) for i in range(length))
+
+
+def read_json(file):
+    try:
+        with open(file, "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        Shout.error(f"Issue reading file: {file}\nMake sure it exists.")
+        return None
+
+
+def copy_csv(source, destination, strip_empty=True):
+    """
+    Copy a csv file.
+
+    Args:
+        source (str): Path to the source file.
+        destination (str): Path to the destination file.
+        strip_empty (bool, optional): Whether to strip empty lines. Defaults to True.
+
+    Raises:
+        TypeError: If `source` or `destination` is not a string.
+
+    Returns:
+        None
+    """
+    if type(source) != str or type(destination) != str:
+        raise TypeError(
+            f"Invalid type for source or destination: {type(source)}, {type(destination)}"
+        )
+    try:
+        with open(destination, "w") as f:
+            if strip_empty:
+                f.writelines(
+                    [line for line in open(source, "r").readlines() if line.strip() != ""]
+                )
+            else:
+                f.writelines([line for line in open(source, "r").readlines()])
+    except FileNotFoundError:
+        Shout.error(f"Issue reading file(s): {source}, {destination}\nMake sure they exist.")
+        return None
+
+
+def read_csv(file):
+    """
+    Read a csv file.
+
+    Args:
+        file (str): The csv file to read from.
+
+    Raises:
+        TypeError: If `file` is not a string.
+
+    Returns:
+        list: A list of rows as dictionaries.
+    """
+    if type(file) != str:
+        raise TypeError(f"Invalid type for file: {type(file)}")
+    try:
+        with open(file, "r") as f:
+            data = csv.DictReader(f)
+            return [row for row in data]
+    except FileNotFoundError:
+        Shout.error(f"Issue reading file: {file}\nMake sure it exists.")
+        return None
+
+
+def write_csv(file, data, headers=None):
+    """
+    Write to a csv file.
+
+    Args:
+        file (str): The csv file to write to.
+        data (list): The data to write (list of dictionaries).
+        headers (list, optional): The headers for the csv file. Defaults to None.
+
+    Raises:
+        TypeError: If `file` or `data` is not a string or list.
+
+    Returns:
+        None
+    """
+    if type(file) != str or type(data) != list:
+        raise TypeError(f"Invalid type for file or data: {type(file)}, {type(data)}")
+    try:
+        if headers:
+            for header in headers:
+                if type(header) != str:
+                    raise TypeError(f"Invalid type for header: {type(header)}")
+                if header.lower() == header:
+                    Shout.warning(f"Header '{header}' is lowercase. Consider capitalizing it.")
+        with open(file, "w") as f:
+            writer = csv.DictWriter(f, fieldnames=headers)
+            writer.writeheader()
+            writer.writerows(data)
+    except FileNotFoundError:
+        Shout.error(f"Issue reading file: {file}\nMake sure it exists.")
+        return None
+
+
+def get_csv_row(key, value, file):
+    """
+    Get a row from a csv file.
+
+    Args:
+        key (str): The key or header of the column to search in.
+        value (str): The value to search for.
+        file (str): The csv file to read from.
+
+    Returns:
+        dict: The row as a dictionary.
+    """
+    if type(key) != str:
+        raise TypeError(f"Invalid type for key: {type(key)}")
+    if type(value) != str:
+        raise TypeError(f"Invalid type for value: {type(value)}")
+    try:
+        with open(file, "r") as f:
+            data = csv.DictReader(f)
+            for row in data:
+                if row[key] == value:
+                    return row
+            else:
+                return None
+    except (FileNotFoundError, KeyError):
+        Shout.error(f"Issue reading file: {file}\nMake sure it exists and the key is correct.")
+        return None
+
+
+def get_csv_col(key, file):
+    """
+    Get a column from a csv file.
+
+    Args:
+        key (str): The column key or header.
+        file (str): The csv file to read from.
+
+    Returns:
+        _type_: _description_
+    """
+    if type(key) != str:
+        raise TypeError(f"Invalid type for key: {type(key)}")
+    if type(file) != str:
+        raise TypeError(f"Invalid type for file: {type(file)}")
+    try:
+        with open(file, "r") as f:
+            data = csv.DictReader(f)
+            return [row[key] for row in data]
+    except (FileNotFoundError, KeyError):
+        Shout.error(f"Issue reading file: {file}\nMake sure it exists and the key is correct.")
+        return None
 
 
 def reverse(iterable):
     """
     Reverses a list, string, or dictionary.
 
-    Parameters:
+    Args:
         iterable (list, str, dict): The list, string, or dictionary to reverse.
 
     Returns:
@@ -122,391 +284,27 @@ def reverse(iterable):
         return None
 
 
-class Chalk:
+def replace_all(text, old, new):
     """
-    A utility class for printing colored test using ANSI escape codes.
+    Replace all instances of a string in a string.
 
-    Methods:
-        bold(text): Prints bold text.
-        italic(text): Prints italic text.
-        underline(text): Prints underlined text.
-        red(text): Prints red text.
-        yellow(text): Prints yellow text.
-        green(text): Prints green text.
-        cyan(text): Prints cyan text.
-        blue(text): Prints blue text.
-        magenta(text): Prints magenta text.
-        white(text): Prints white text.
-        black(text): Prints black text.
+    Args:
+        text (str): The string to replace in.
+        old (list, str): The string or list of strings to replace.
+        new (str): The string to replace with.
 
-        reset(): Resets the text color to the default color.
-        set(color): Sets the text color to the specified color.
+    Raises:
+        TypeError: If `old` is not a string or list.
+
+    Returns:
+        str: The string with all instances of `old` replaced with `new`.
     """
-
-    def bold(text):
-        """
-        Prints bold text.
-
-        Parameters:
-            text (str): The text to print.
-
-        Returns:
-            str: The bolded text.
-        """
-        return "\033[1m" + text + "\033[0m"
-
-    def italic(text):
-        """
-        Prints italicized text.
-
-        Parameters:
-            text (str): The text to print.
-
-        Returns:
-            str: The italicized text.
-        """
-        return "\033[3m" + text + "\033[0m"
-
-    def underline(text):
-        """
-        Prints underlined text.
-
-        Parameters:
-            text (str): The text to print.
-
-        Returns:
-            str: The underlined text.
-        """
-        return "\033[4m" + text + "\033[0m"
-
-    def red(text):
-        """
-        Prints red text.
-
-        Parameters:
-            text (str): The text to print.
-
-        Returns:
-            str: The red text.
-        """
-        return "\033[0;31m" + text + "\033[0m"
-
-    def yellow(text):
-        """
-        Prints yellow text.
-
-        Parameters:
-            text (str): The text to print.
-
-        Returns:
-            str: The yellow text.
-        """
-        return "\033[0;33m" + text + "\033[0m"
-
-    def green(text):
-        """
-        Prints green text.
-
-        Parameters:
-            text (str): The text to print.
-
-        Returns:
-            str: The green text.
-        """
-        return "\033[0;32m" + text + "\033[0m"
-
-    def cyan(text):
-        """
-        Prints cyan text.
-
-        Parameters:
-            text (str): The text to print.
-
-        Returns:
-            str: The cyan text.
-        """
-        return "\033[0;36m" + text + "\033[0m"
-
-    def blue(text):
-        """
-        Prints blue text.
-
-        Parameters:
-            text (str): The text to print.
-
-        Returns:
-            str: The blue text.
-        """
-        return "\033[0;34m" + text + "\033[0m"
-
-    def magenta(text):
-        """
-        Prints magenta text.
-
-        Parameters:
-            text (str): The text to print.
-
-        Returns:
-            str: The magenta text.
-        """
-        return "\033[0;35m" + text + "\033[0m"
-
-    def white(text):
-        """
-        Prints white text.
-
-        Parameters:
-            text (str): The text to print.
-
-        Returns:
-            str: The white text.
-        """
-        return "\033[0;37m" + text + "\033[0m"
-
-    def black(text):
-        """
-        Prints black text.
-
-        Parameters:
-            text (str): The text to print.
-
-        Returns:
-            str: The black text.
-        """
-        return "\033[0;30m" + text + "\033[0m"
-
-    def reset():
-        """
-        Resets the text color to the default color.
-
-        Parameters:
-            None
-
-        Returns:
-            None
-        """
-        print("\033[0m", end="")
-
-    def set(style):
-        """
-        Sets the text color to the specified color.
-
-        Parameters:
-            style (str): The color to set the text to.
-
-        Returns:
-            None
-        """
-        if style in ["bold", "b"]:
-            print("\033[1m", end="")
-        elif style in ["italic", "i"]:
-            print("\033[3m", end="")
-        elif style in ["underline", "underl", "ul"]:
-            print("\033[4m", end="")
-        elif style in ["black"]:
-            print("\033[0;30m", end="")
-        elif style in ["white"]:
-            print("\033[0;37m", end="")
-        elif style in ["red"]:
-            print("\033[0;31m", end="")
-        elif style in ["green"]:
-            print("\033[0;32m", end="")
-        elif style in ["yellow"]:
-            print("\033[0;33m", end="")
-        elif style in ["cyan"]:
-            print("\033[0;36m", end="")
-        elif style in ["blue"]:
-            print("\033[0;34m", end="")
-        elif style in ["magenta"]:
-            print("\033[0;35m", end="")
-        else:
-            raise ValueError("Invalid style")
-
-
-class Console:
-    """
-    A utility class for interacting with the console.
-
-    Methods:
-        clear(): Clears the console.
-        format(style): Sets the text color to the specified color.
-    """
-
-    def clear():
-        """
-        Clears the console.
-
-        Parameters:
-            None
-
-        Returns:
-            None
-        """
-        os.system("clear")
-
-    def format(style):
-        """
-        Sets the text color to the specified color.
-
-        Parameters:
-            style (str): The color to set the text to.
-
-        Returns:
-            None
-        """
-        Chalk.format(style)
-
-
-class Wait:
-    """
-    A utility class for printing a loading animation to the console.
-
-    Methods:
-        start(): Starts the loading animation.
-        stop(): Stops the loading animation.
-        wait(seconds): Waits for the specified amount of time.
-        input(message, color): Waits for the user to press a key.
-    """
-
-    def start():
-        """
-        Starts the loading animation.
-
-        Parameters:
-            None
-
-        Returns:
-            None
-        """
-        for i in itertools.cycle(["|", "/", "-", "\\"]):
-            print(f"\rLoading {i}", end="")
-            time.sleep(0.05)
-
-    def stop():
-        """
-        Stops the loading animation.
-
-        Parameters:
-            None
-
-        Returns:
-            None
-        """
-        print("\rLoading done!     ")
-
-    def wait(seconds):
-        """
-        Waits for the specified amount of time.
-
-        Parameters:
-            seconds (int): The amount of time to wait.
-
-        Returns:
-            None
-        """
-        time.sleep(seconds)
-
-    def input(message="Press any key to continue . . .", color="white"):
-        """
-        Waits for the user to press a key.
-
-        Parameters:
-            message (str): The message to print.
-            color (str): The color of the message.
-
-        Returns:
-            None
-        """
-        input(f"{Chalk.set(color)}{message}{Chalk.reset()}")
-
-
-class Shout:
-    """
-    A utility class for printing messages to the console.
-
-    Methods:
-        warning(message): Prints a warning message to the console (yellow text).
-        error(message): Prints an error message to the console (red text).
-        success(message): Prints a success message to the console (green text).
-        info(message): Prints an info message to the console (blue text).
-
-    """
-
-    def warning(message):
-        """
-        Prints a warning message to the console (yellow text).
-
-        Parameters:
-            message (str): The message to print.
-
-        Returns:
-            None
-        """
-        print(f"{Chalk.yellow('Warning')}: {message}")
-
-    def error(message):
-        """
-        Prints an error message to the console (red text).
-
-        Parameters:
-            message (str): The message to print.
-
-        Returns:
-            None
-        """
-        print(f"{Chalk.red('Error')}: {message}")
-
-    def success(message):
-        """
-        Prints a success message to the console (green text).
-
-        Parameters:
-            message (str): The message to print.
-
-        Returns:
-            None
-        """
-        print(f"{Chalk.green('Success')}: {message}")
-
-    def info(message):
-        """
-        Prints an info message to the console (blue text).
-
-        Parameters:
-            message (str): The message to print.
-
-        Returns:
-            None
-        """
-        print(f"{Chalk.blue('Info')}: {message}")
-
-    def welcome(title, name, version="", source="", license="", message="", pause=True):
-        """
-        Prints a welcome message to the console.
-
-        Parameters:
-            title (str): The title of the program.
-            name (str): The name of the program.
-            version (str): The version of the program (optional).
-            source (str): The source of the data (optional).
-            license (str): The license of the program (optional).
-            message (str): The message to print (optional).
-            pause (bool): Whether or not to pause the program (optional).
-
-        Returns:
-            None
-        """
-        Console.clear()
-        Chalk.format("italic")
-        print(f"{title} {Chalk.bold(version)}\n")
-        if license != "":
-            print(f"Licensed under the {Chalk.bold(license, 'License')}.")
-        print(f"(c) 2023 {Chalk.bold(name)}.")
-        if source != "":
-            print(f"Data sourced from {Chalk.underline(source)}.")
-        if message != "":
-            print(f"{message}")
-        Chalk.reset()
-        if pause:
-            Wait.until()
-        Console.clear()
+    if isinstance(old, list):
+        for i in old:
+            text = replace_all(text, i, new)
+    elif isinstance(old, str):
+        while old in text:
+            text = text.replace(old, new)
+    else:
+        raise TypeError(f"Invalid type: {type(old)}")
+    return text

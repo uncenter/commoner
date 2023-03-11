@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "commoner"
-version = "0.2.0"
+version = "0.3.0"
 description = "Commoner provides a set of common functions and classes for Python projects."
 authors = ["uncenter <me@uncenter.org>"]
 readme = "README.md"
