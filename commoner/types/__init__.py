@@ -1,12 +1,9 @@
 """
-A submodule of commoner, this module contains utility functions and classes for various types.
+A module for improved Python types.
 
 Classes:
     Dict: An extension of the dict type with additional functionality.
     Text: An extension of the str type with additional functionality.
-
-Functions:
-    None
 """
 
 

@@ -20,7 +20,7 @@ Functions:
     random_string(length=16, chars=string.printable): Generates a random string of a specified length.
     reverse(iterable): Reverses a list, string, or dictionary.
 """
-__version__ = "0.3.1"
+__version__ = "0.4.0"
 import time
 import string
 import random
