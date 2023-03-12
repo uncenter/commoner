@@ -20,7 +20,7 @@ Functions:
     random_string(length=16, chars=string.printable): Generates a random string of a specified length.
     reverse(iterable): Reverses a list, string, or dictionary.
 """
-__version__ = "0.4.0"
+__version__ = "0.4.1"
 import time
 import string
 import random
@@ -382,7 +382,7 @@ class Shout:
         print(f"{Chalk.blue('Info')}: {message}")
 
     @staticmethod
-    def welcome(title, name, version="", source="", license="", message="", pause=True):
+    def welcome(title, author, version="", source="", license="", message="", pause=True):
         """
         Prints a welcome message to the console.
 
@@ -403,14 +403,14 @@ class Shout:
         print(f"{title} {Chalk.bold(version)}\n")
         if license != "":
             print(f"Licensed under the {Chalk.bold(license)}.")
-        print(f"(c) 2023 {Chalk.bold(name)}.")
+        print(f"(c) 2023 {Chalk.bold(author)}.")
         if source != "":
             print(f"Data sourced from {Chalk.underline(source)}.")
         if message != "":
             print(f"{message}")
         Chalk.reset()
         if pause:
-            Wait.until()
+            Wait.input()
         Console.clear()
 
 
