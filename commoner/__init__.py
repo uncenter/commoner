@@ -20,7 +20,7 @@ Functions:
     random_string(length=16, chars=string.printable): Generates a random string of a specified length.
     reverse(iterable): Reverses a list, string, or dictionary.
 """
-__version__ = "0.4.1"
+__version__ = "0.4.2"
 import time
 import string
 import random
@@ -314,7 +314,9 @@ class Wait:
         Returns:
             None
         """
-        input(f"{Chalk.set(color)}{message}{Chalk.reset()}")
+        Chalk.set(color)
+        input(message)
+        Chalk.reset()
 
 
 class Shout:
@@ -388,7 +390,7 @@ class Shout:
 
         Args:
             title (str): The title of the program.
-            name (str): The name of the program.
+            author (str): The author of the program.
             version (str): The version of the program (optional).
             source (str): The source of the data (optional).
             license (str): The license of the program (optional).
