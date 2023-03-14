@@ -2,12 +2,17 @@
 Commoner is a Python library that contains a collection of useful functions and classes.
 
 Modules:
-    types: A submodule of commoner, this module contains utility functions and classes for various types.
-        Dict: An extension of the dict type with additional functionality (class).
-        Text: An extension of the str type with additional functionality (class).
+    types: A module for improved Python types.
+        Dict: An extension of the dict type with additional functionality.
+        Text: An extension of the str type with additional functionality.
+    math: A module for mathematical functions.
+        distance(token1, token2, display=False): Calculates the Levenshtein distance between two tokens.
+    brush: A module for colored text.
+        Brush: A utility class for printing colored text using ANSI escape codes.
+
 
 Classes:
-    Chalk: A utility class for printing colored test using ANSI escape codes.
+    Chalk: DEPRECATED. A utility class for printing colored test using ANSI escape codes.
     Console: A utility class for controlling the console.
     Wait: A utility class for waiting-related functions.
     Shout: A utility class for message-related functions.
@@ -20,7 +25,7 @@ Functions:
     random_string(length=16, chars=string.printable): Generates a random string of a specified length.
     reverse(iterable): Reverses a list, string, or dictionary.
 """
-__version__ = "0.4.2"
+__version__ = "0.5.0"
 import time
 import string
 import random
@@ -28,11 +33,18 @@ import json
 import csv
 import os
 
+from .brush import Brush
+
 string.end_punctuation = ".!?"
 
 
 class Chalk:
     """
+    WARNING: This class is deprecated and will be removed in a future version of Commoner.
+    Please use the Brush class instead.
+
+    ----------------------------
+
     A utility class for printing colored test using ANSI escape codes.
 
     Methods:
@@ -273,9 +285,9 @@ class Console:
             None
         """
         if style is None:
-            Chalk.reset()
+            Brush.reset()
         else:
-            Chalk.set(style)
+            Brush.set(style)
 
 
 class Wait:
@@ -303,7 +315,7 @@ class Wait:
         time.sleep(seconds)
 
     @staticmethod
-    def input(message="Press any key to continue . . .", color="white"):
+    def input(message="Press the ENTER key to continue... ", color="white"):
         """
         Waits for the user to press a key.
 
@@ -314,9 +326,9 @@ class Wait:
         Returns:
             None
         """
-        Chalk.set(color)
+        Brush.set(color)
         input(message)
-        Chalk.reset()
+        Brush.reset()
 
 
 class Shout:
@@ -342,7 +354,7 @@ class Shout:
         Returns:
             None
         """
-        print(f"{Chalk.yellow('Warning')}: {message}")
+        print(f"{Brush.yellow('Warning')}: {message}")
 
     @staticmethod
     def error(message):
@@ -355,7 +367,7 @@ class Shout:
         Returns:
             None
         """
-        print(f"{Chalk.red('Error')}: {message}")
+        print(f"{Brush.red('Error')}: {message}")
 
     @staticmethod
     def success(message):
@@ -368,7 +380,7 @@ class Shout:
         Returns:
             None
         """
-        print(f"{Chalk.green('Success')}: {message}")
+        print(f"{Brush.green('Success')}: {message}")
 
     @staticmethod
     def info(message):
@@ -381,7 +393,7 @@ class Shout:
         Returns:
             None
         """
-        print(f"{Chalk.blue('Info')}: {message}")
+        print(f"{Brush.blue('Info')}: {message}")
 
     @staticmethod
     def welcome(title, author, version="", source="", license="", message="", pause=True):
@@ -401,16 +413,16 @@ class Shout:
             None
         """
         Console.clear()
-        Chalk.set("italic")
-        print(f"{title} {Chalk.bold(version)}\n")
+        Brush.set("italic")
+        print(f"{title} {Brush.bold(version)}\n")
         if license != "":
-            print(f"Licensed under the {Chalk.bold(license)}.")
-        print(f"(c) 2023 {Chalk.bold(author)}.")
+            print(f"Licensed under the {Brush.bold(license)}.")
+        print(f"(c) 2023 {Brush.bold(author)}.")
         if source != "":
-            print(f"Data sourced from {Chalk.underline(source)}.")
+            print(f"Data sourced from {Brush.underline(source)}.")
         if message != "":
             print(f"{message}")
-        Chalk.reset()
+        Brush.reset()
         if pause:
             Wait.input()
         Console.clear()

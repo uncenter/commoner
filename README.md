@@ -32,9 +32,9 @@ Commoner is a collection of common functions and classes that can be used in any
 * swap_keys_values() - Swaps the keys and values of a dictionary.
 * reverse() - Reverses a list, string, or dictionary.
 
-### Chalk
+### Brush
 
-The Chalk class provides a set of methods for printing colored text using ANSI escape codes.
+The Brush class provides a set of methods for printing colored text to the console.
 
 * bold(text) - Prints bold text.
 * italic(text) - Prints italic text.
